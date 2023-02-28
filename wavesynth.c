@@ -18,10 +18,12 @@
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
+
+#include "note.h"
 #include "wav.h"
 
 static void
-note(const struct wav_hdr *hdr,
+synth(const struct wav_hdr *hdr,
 		struct wav_data *data, double freq,
 		unsigned int ms, int amp)
 {
@@ -40,30 +42,28 @@ note(const struct wav_hdr *hdr,
 	}
 }
 
-
 int
 main(void)
 {
 	struct wav_hdr hdr;
 	struct wav_data data;
+	struct scale minor_scale;
+	struct note c_note, toplay;
 
 	wav_hdr_init(&hdr);
 	wav_data_init(&data);
 
 	srand(time(NULL));
+	note_make(&c_note, NOTE_C, 3);
+	scale_make(&minor_scale, "whwwhww");
 
-	while (wav_duration(&hdr, &data) < 4000) {
-		note(
-			&hdr,
-			&data,
-			20 * (2 + rand() % 6),  // frequency
-			150 * (1 + rand() % 2), // duration (ms)
-			32760                   // amplitude
-		);
+	while (wav_duration(&hdr, &data) < 10000) {
+		scale_note(&minor_scale, &c_note, rand() % 8, &toplay);
+		synth(&hdr, &data, toplay.freq, 200, 32760);
 	}
 
 	wav_hdr_recalculate_file_size(&hdr, &data);
-	wav_write(&hdr, &data, "test.wav");
+	wav_write(&hdr, &data, "synth.wav");
 	wav_data_reset(&data);
 
 	return 0;

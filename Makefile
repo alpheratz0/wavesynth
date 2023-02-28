@@ -9,9 +9,10 @@ LDFLAGS=-s
 all: wavesynth
 
 wav.o: wav.c wav.h
+note.o: note.c note.h
 utils.o: utils.c utils.h
 wavesynth.o: wavesynth.c
-wavesynth: wav.o utils.o wavesynth.o
+wavesynth: wav.o note.o utils.o wavesynth.o
 
 clean:
 	rm -f wavesynth *.o

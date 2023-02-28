@@ -169,7 +169,7 @@ extern unsigned long
 wav_duration(const struct wav_hdr *hdr,
 		const struct wav_data *data)
 {
-	return (data->samples_len * 1000) /
+	return ((unsigned long) data->samples_len * 1000) /
 		(hdr->samples_per_sec * hdr->channels);
 }
 
