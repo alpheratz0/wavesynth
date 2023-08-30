@@ -1,11 +1,7 @@
 .POSIX:
 .PHONY: clean all install uninstall
 
-CC=cc
-CFLAGS=-std=c99 -pedantic -Wall -Wextra -Os
-LDLIBS=-lm
-LDFLAGS=-s
-PREFIX=/usr/local
+include config.mk
 
 all: wavesynth
 
