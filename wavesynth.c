@@ -17,11 +17,15 @@
 */
 
 #include <time.h>
+#include <string.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "note.h"
 #include "wav.h"
+
+#define MINOR_SCALE_PATTERN "whwwhww"
+#define MAJOR_SCALE_PATTERN "wwhwwwh"
 
 static void
 synth(const struct wav_hdr *hdr,
@@ -44,22 +48,30 @@ synth(const struct wav_hdr *hdr,
 }
 
 int
-main(void)
+main(int argc, char **argv)
 {
 	struct wav_hdr hdr;
 	struct wav_data data;
-	struct scale minor_scale;
-	struct note c_note, toplay;
+	struct scale scale;
+	struct note root, toplay;
 
+	srand(time(NULL));
+
+	// setup
 	wav_hdr_init(&hdr);
 	wav_data_init(&data);
 
-	srand(time(NULL));
-	note_make(&c_note, NOTE_C, 3);
-	scale_make(&minor_scale, "whwwhww");
+	note_make(&root, NOTE_C, 3);
 
+	if (argc > 1 && !strcmp(argv[1], "-major")) {
+		scale_make(&scale, MAJOR_SCALE_PATTERN);
+	} else {
+		scale_make(&scale, MINOR_SCALE_PATTERN);
+	}
+
+	// generate 10s of audio
 	while (wav_duration(&hdr, &data) < 10000) {
-		scale_note(&minor_scale, &c_note, rand() % 8, &toplay);
+		scale_note(&scale, &root, rand() % 8, &toplay);
 		synth(&hdr, &data, toplay.freq, 200, 32760);
 	}
 
