@@ -18,6 +18,7 @@
 
 #include <time.h>
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -47,6 +48,20 @@ synth(const struct wav_hdr *hdr,
 	}
 }
 
+static void
+usage(void)
+{
+	puts("usage: wavesynth [-hv] [-major|-minor]");
+	exit(0);
+}
+
+static void
+version(void)
+{
+	puts("wavesynth version "VERSION);
+	exit(0);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -54,20 +69,37 @@ main(int argc, char **argv)
 	struct wav_data data;
 	struct scale scale;
 	struct note root, toplay;
+	const char *scale_pattern;
 
 	srand(time(NULL));
 
 	// setup
 	wav_hdr_init(&hdr);
 	wav_data_init(&data);
+	scale_pattern = NULL;
 
 	note_make(&root, NOTE_C, 3);
 
-	if (argc > 1 && !strcmp(argv[1], "-major")) {
-		scale_make(&scale, MAJOR_SCALE_PATTERN);
-	} else {
-		scale_make(&scale, MINOR_SCALE_PATTERN);
+	while (++argv, --argc > 0) {
+		if (!strcmp(*argv, "-h")) {
+			usage();
+		} else if (!strcmp(*argv, "-v")) {
+			version();
+		} else if (!strcmp(*argv, "-major")) {
+			scale_pattern = MAJOR_SCALE_PATTERN;
+		} else if (!strcmp(*argv, "-minor")) {
+			scale_pattern = MINOR_SCALE_PATTERN;
+		} else {
+			usage();
+		}
 	}
+
+	if (NULL == scale_pattern) {
+		fprintf(stderr, "wavesynth: a scale must be specified\n");
+		exit(1);
+	}
+
+	scale_make(&scale, scale_pattern);
 
 	// generate 10s of audio
 	while (wav_duration(&hdr, &data) < 10000) {
